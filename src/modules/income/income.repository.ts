@@ -7,6 +7,7 @@ export interface CreateIncomeEntryInput {
   amount: string;
   date: Date;
   type: IncomeEntryType;
+  currency: string
   metadata: Prisma.InputJsonValue;
 }
 
@@ -19,6 +20,7 @@ export const incomeRepository = {
         amount: input.amount,
         date: input.date,
         type: input.type,
+        currency: input.currency,
         metadata: input.metadata,
       },
     });

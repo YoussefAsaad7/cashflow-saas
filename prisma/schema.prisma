@@ -78,6 +78,7 @@ model IncomeEntry {
   userId        String
   sourceId      String
   amount        Decimal  @db.Decimal(12, 2)
+  currency      String
   date          DateTime
   metadata      Json?
 
@@ -151,6 +152,7 @@ model ExpenseEntry {
   userId     String
   categoryId String
   amount     Decimal  @db.Decimal(12, 2)
+  currency   String
   date       DateTime
   metadata   Json?
 

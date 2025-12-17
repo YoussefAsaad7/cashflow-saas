@@ -6,6 +6,7 @@ interface CreateExpenseInput {
   categoryId: string;
   amount: string;
   date: Date;
+  currency: string
   metadata?: Prisma.InputJsonValue;
 }
 
