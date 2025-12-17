@@ -3,12 +3,124 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+enum IncomeSourceType {
+  FULL_TIME
+  FREELANCE
+  RENTAL
+  BUSINESS
+  OTHER
+}
+
+enum WorkDayStatus {
+  WORKED
+  HOLIDAY
+  WORKED_HOLIDAY
+  SICK
+  UNPAID_LEAVE
+}
+
+enum ExpenseType {
+  FIXED
+  VARIABLE
+}
+
+enum IncomeEntryType {
+  MANUAL
+  SALARY
+  BONUS
+  ADJUSTMENT
+}
+
+
 
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
+// prisma/schema.prisma
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  incomeSources IncomeSource[]
+  incomeEntries IncomeEntry[]
+  expenseCategories ExpenseCategory[]
+  expenseEntries ExpenseEntry[]
+  workDays WorkDay[]
+}
+
+model IncomeSource {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  type      IncomeSourceType
+  isActive  Boolean  @default(true)
+
+  user      User     @relation(fields: [userId], references: [id])
+  entries   IncomeEntry[]
+
+  createdAt DateTime @default(now())
+}
+
+model IncomeEntry {
+  id            String   @id @default(cuid())
+  userId        String
+  sourceId      String
+  amount        Decimal  @db.Decimal(12, 2)
+  date          DateTime
+  metadata      Json?
+
+  type          IncomeEntryType @default(MANUAL)
+
+  user          User         @relation(fields: [userId], references: [id])
+  source        IncomeSource @relation(fields: [sourceId], references: [id])
+
+  createdAt     DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+model WorkDay {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime
+  status    WorkDayStatus
+  amount    Decimal  @db.Decimal(12, 2)
+  metadata  Json?
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+}
+
+model ExpenseCategory {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  type      ExpenseType
+
+  user      User     @relation(fields: [userId], references: [id])
+  entries   ExpenseEntry[]
+}
+
+model ExpenseEntry {
+  id         String   @id @default(cuid())
+  userId     String
+  categoryId String
+  amount     Decimal  @db.Decimal(12, 2)
+  date       DateTime
+  metadata   Json?
+
+  user       User            @relation(fields: [userId], references: [id])
+  category   ExpenseCategory @relation(fields: [categoryId], references: [id])
+
+  createdAt  DateTime @default(now())
+
+  @@index([userId, date])
 }
