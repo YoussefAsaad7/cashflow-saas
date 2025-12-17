@@ -1,19 +1,20 @@
 import prisma from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
+import { DateUtils } from "@/lib/date-utils";
 
 interface CreateExpenseInput {
   userId: string;
   categoryId: string;
   amount: string;
   date: Date;
-  currency: string
+  currency: string;
   metadata?: Prisma.InputJsonValue;
 }
 
 export const expenseRepository = {
   create(input: CreateExpenseInput) {
     return prisma.expenseEntry.create({
-      data: input,
+      data: { ...input, date: DateUtils.normalizeDate(input.date) },
     });
   },
 
@@ -21,8 +22,12 @@ export const expenseRepository = {
     return prisma.expenseEntry.findMany({
       where: {
         userId,
-        date: { gte: from, lte: to },
+        date: {
+          gte: DateUtils.normalizeDate(from),
+          lte: DateUtils.normalizeDate(to),
+        },
       },
+      orderBy: { date: "asc" },
     });
   },
 };

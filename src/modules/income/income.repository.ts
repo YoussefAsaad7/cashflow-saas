@@ -1,5 +1,7 @@
 import prisma from "@/lib/prisma";
 import { IncomeEntryType, Prisma } from "@/generated/prisma/client";
+import { DateUtils } from "@/lib/date-utils";
+
 
 export interface CreateIncomeEntryInput {
   userId: string;
@@ -18,7 +20,7 @@ export const incomeRepository = {
         userId: input.userId,
         sourceId: input.sourceId,
         amount: input.amount,
-        date: input.date,
+        date: DateUtils.normalizeDate(input.date),
         type: input.type,
         currency: input.currency,
         metadata: input.metadata,
@@ -30,7 +32,7 @@ export const incomeRepository = {
     return prisma.incomeEntry.findMany({
       where: {
         userId,
-        date: { gte: from, lte: to },
+        date: { gte: DateUtils.normalizeDate(from), lte: DateUtils.normalizeDate(to) },
       },
       orderBy: { date: "asc" },
     });
