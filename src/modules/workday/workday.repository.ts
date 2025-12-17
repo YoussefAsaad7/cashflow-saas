@@ -6,6 +6,7 @@ export interface UpsertWorkDayInput {
   date: Date;
   status: WorkDayStatus;
   amount: string;
+  salaryRuleId: string
   metadata?: Prisma.InputJsonValue;
 }
 
@@ -28,6 +29,7 @@ export const WorkDayRepository = {
         date: input.date,
         status: input.status,
         amount: input.amount,
+        salaryRuleId: input.salaryRuleId,
         metadata: input.metadata,
       },
     });
