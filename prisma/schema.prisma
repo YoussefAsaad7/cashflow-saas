@@ -31,6 +31,11 @@ enum IncomeEntryType {
   ADJUSTMENT
 }
 
+enum SalaryBaseType {
+  MONTHLY
+  DAILY
+  HOURLY
+}
 
 
 generator client {
@@ -86,12 +91,44 @@ model IncomeEntry {
   @@index([userId, date])
 }
 
+model SalaryRule {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String   // "Company A - 2024"
+  currency      String   // "USD", "EUR"
+  baseType      SalaryBaseType
+  baseAmount    Decimal
+
+  standardHoursPerDay Decimal
+  workingDaysPerMonth Int?
+
+  overtimeEnabled Boolean
+  overtimeMultiplier Decimal?
+
+  holidayPaid Boolean
+  holidayMultiplier Decimal?
+
+  createdAt     DateTime @default(now())
+  validFrom     DateTime
+  validTo       DateTime?
+
+  isActive      Boolean  @default(true)
+
+  workDays      WorkDay[]
+
+  @@index([userId, isActive])
+}
+
+
 model WorkDay {
   id        String   @id @default(cuid())
   userId    String
   date      DateTime
   status    WorkDayStatus
   amount    Decimal  @db.Decimal(12, 2)
+  salaryRuleId String
+  salaryRule   SalaryRule @relation(fields: [salaryRuleId], references: [id])
+  createdAt    DateTime @default(now())
   metadata  Json?
 
   user      User     @relation(fields: [userId], references: [id])
