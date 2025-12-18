@@ -1,7 +1,8 @@
 import { WorkDayRepository } from './workday.repository';
 import { salaryRuleService } from '../salary-rules/salary-rule.service';
 import { SalaryCalculator, SalaryRuleDomain } from '../salary-calculator.engine';
-import { WorkDayStatus, SalaryRule } from '@/generated/prisma/client';
+import { WorkDayStatus } from '@/generated/prisma/client';
+import { DateUtils } from '@/lib/date-utils';
 import Decimal from 'decimal.js';
 
 export const workdayService = {
@@ -15,8 +16,11 @@ export const workdayService = {
         status: WorkDayStatus,
         hoursWorked?: number
     ) {
+        // Normalize Date to Midnight UTC
+        const normalizedDate = DateUtils.normalizeDate(date);
+
         // 1. Get the Salary Rule active for this date
-        const rule = await salaryRuleService.getForDate(userId, date);
+        const rule = await salaryRuleService.getForDate(userId, normalizedDate);
 
         if (!rule) {
             throw new Error(`No active salary rule found for date: ${date.toISOString()}`);
@@ -45,7 +49,7 @@ export const workdayService = {
         // 4. Persist
         return WorkDayRepository.upsert({
             userId,
-            date,
+            date: normalizedDate,
             status,
             amount: earnings.toString(), // Store as string/decimal in DB
             salaryRuleId: rule.id,
@@ -58,5 +62,15 @@ export const workdayService = {
                 }
             }
         });
+    },
+
+    /**
+     * Retrieves work days for a user within a specific date range.
+     */
+    async getWorkDaysInRange(userId: string, from: Date, to: Date) {
+        const start = DateUtils.normalizeDate(from);
+        const end = DateUtils.normalizeDate(to);
+
+        return WorkDayRepository.findByRange(userId, start, end);
     }
 };
