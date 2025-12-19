@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { IncomeEntryType, Prisma } from "@/generated/prisma/client";
+import { IncomeEntryType, IncomeSourceType, Prisma } from "@/generated/prisma/client";
 import { DateUtils } from "@/lib/date-utils";
 
 
@@ -13,7 +13,29 @@ export interface CreateIncomeEntryInput {
   metadata: Prisma.InputJsonValue;
 }
 
+export interface CreateIncomeSourceInput {
+  userId: string;
+  name: string;
+  type: IncomeSourceType;
+}
+
 export const incomeRepository = {
+  createSource(input: CreateIncomeSourceInput) {
+    return prisma.incomeSource.create({
+      data: {
+        userId: input.userId,
+        name: input.name,
+        type: input.type,
+      }
+    });
+  },
+
+  listSources(userId: string) {
+    return prisma.incomeSource.findMany({
+      where: { userId, isActive: true },
+    });
+  },
+
   create(input: CreateIncomeEntryInput) {
     return prisma.incomeEntry.create({
       data: {
