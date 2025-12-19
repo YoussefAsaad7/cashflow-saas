@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma";
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, ExpenseType } from "@/generated/prisma/client";
 import { DateUtils } from "@/lib/date-utils";
 
-interface CreateExpenseInput {
+export interface CreateExpenseInput {
   userId: string;
   categoryId: string;
   amount: string;
@@ -11,7 +11,26 @@ interface CreateExpenseInput {
   metadata?: Prisma.InputJsonValue;
 }
 
+export interface CreateExpenseCategoryInput {
+  userId: string;
+  name: string;
+  type: ExpenseType;
+}
+
 export const expenseRepository = {
+  createCategory(input: CreateExpenseCategoryInput) {
+    return prisma.expenseCategory.create({
+      data: input,
+    });
+  },
+
+  listCategories(userId: string) {
+    return prisma.expenseCategory.findMany({
+      where: { userId },
+      orderBy: { name: 'asc' },
+    });
+  },
+
   create(input: CreateExpenseInput) {
     return prisma.expenseEntry.create({
       data: { ...input, date: DateUtils.normalizeDate(input.date) },
