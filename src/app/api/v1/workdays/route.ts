@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { workdayService } from '@/modules/workday/workday.service';
 import { WorkDayStatus } from '@/generated/prisma/client';
+import { getCurrentUser } from '@/lib/session';
 
 // Schema for Validation
 const logWorkDaySchema = z.object({
@@ -13,6 +14,11 @@ const logWorkDaySchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        const user = await getCurrentUser(request);
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
 
         // 1. Validate Input
@@ -25,11 +31,10 @@ export async function POST(request: NextRequest) {
         }
 
         const { date, status, hoursWorked } = result.data;
-        const userId = "user-123"; // Placeholder for dev until Auth is integrated
 
         // 3. Call Service (Service normalized date)
         const workDay = await workdayService.logWorkDay(
-            userId,
+            user.id,
             new Date(date),
             status,
             hoursWorked
@@ -47,11 +52,15 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+    const user = await getCurrentUser(request);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     try {
         const { searchParams } = new URL(request.url);
         const from = searchParams.get('from');
         const to = searchParams.get('to');
-        const userId = "user-123";
 
         if (!from || !to) {
             return NextResponse.json(
@@ -61,7 +70,7 @@ export async function GET(request: NextRequest) {
         }
 
         const data = await workdayService.getWorkDaysInRange(
-            userId,
+            user.id,
             new Date(from),
             new Date(to)
         );

@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyticsService } from '@/modules/analytics/analytics.service';
+import { getCurrentUser } from '@/lib/session';
 
 export async function GET(request: NextRequest) {
+    const user = await getCurrentUser(request);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const from = searchParams.get('from');
     const to = searchParams.get('to');
-    const userId = "user-123"; // TODO: Auth
 
     if (!from || !to) {
         return NextResponse.json(
@@ -16,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const breakdown = await analyticsService.getExpenseCategoryBreakdown(
-            userId,
+            user.id,
             new Date(from),
             new Date(to)
         );

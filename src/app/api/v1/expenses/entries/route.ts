@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { expenseService } from '@/modules/expenses/expense.service';
+import { getCurrentUser } from '@/lib/session';
 
 const logExpenseEntrySchema = z.object({
     categoryId: z.string().cuid(),
@@ -12,6 +13,11 @@ const logExpenseEntrySchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        const user = await getCurrentUser(request);
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const result = logExpenseEntrySchema.safeParse(body);
 
@@ -23,10 +29,8 @@ export async function POST(request: NextRequest) {
         }
 
         const data = result.data;
-        const userId = "user-123";
-
         const entry = await expenseService.logExpense({
-            userId,
+            userId: user.id,
             categoryId: data.categoryId,
             amount: data.amount.toString(),
             currency: data.currency,
@@ -45,10 +49,14 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+    const user = await getCurrentUser(request);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const from = searchParams.get('from');
     const to = searchParams.get('to');
-    const userId = "user-123";
 
     if (!from || !to) {
         return NextResponse.json(
@@ -59,7 +67,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const history = await expenseService.getExpenseHistory(
-            userId,
+            user.id,
             new Date(from),
             new Date(to)
         );

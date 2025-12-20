@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { expenseService } from '@/modules/expenses/expense.service';
 import { ExpenseType } from '@/generated/prisma/client';
+import { getCurrentUser } from '@/lib/session';
 
 const createExpenseCategorySchema = z.object({
     name: z.string().min(1),
@@ -10,6 +11,11 @@ const createExpenseCategorySchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        const user = await getCurrentUser(request);
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const result = createExpenseCategorySchema.safeParse(body);
 
@@ -21,9 +27,7 @@ export async function POST(request: NextRequest) {
         }
 
         const { name, type } = result.data;
-        const userId = "user-123"; // TODO: Auth
-
-        const category = await expenseService.createCategory({ userId, name, type });
+        const category = await expenseService.createCategory({ userId: user.id, name, type });
         return NextResponse.json(category, { status: 201 });
     } catch (error: any) {
         return NextResponse.json(
@@ -34,9 +38,13 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-    const userId = "user-123"; // TODO: Auth
+    const user = await getCurrentUser(request);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     try {
-        const categories = await expenseService.getCategories(userId);
+        const categories = await expenseService.getCategories(user.id);
         return NextResponse.json(categories, { status: 200 });
     } catch (error: any) {
         return NextResponse.json(

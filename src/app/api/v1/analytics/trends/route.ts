@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyticsService } from '@/modules/analytics/analytics.service';
 import { z } from 'zod';
+import { getCurrentUser } from '@/lib/session';
 
 const intervalSchema = z.enum(['day', 'month']).default('day');
 
 export async function GET(request: NextRequest) {
+    const user = await getCurrentUser(request);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const from = searchParams.get('from');
     const to = searchParams.get('to');
     const intervalParam = searchParams.get('interval') || 'day';
-    const userId = "user-123"; // TODO: Auth
 
     if (!from || !to) {
         return NextResponse.json(
@@ -23,7 +28,7 @@ export async function GET(request: NextRequest) {
         const interval = parseResult.success ? parseResult.data : 'day';
 
         const trends = await analyticsService.getTrends(
-            userId,
+            user.id,
             new Date(from),
             new Date(to),
             interval

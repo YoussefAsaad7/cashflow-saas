@@ -1,8 +1,8 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { salaryRuleService } from '@/modules/salary-rules/salary-rule.service';
 import { SalaryBaseType } from '@/generated/prisma/client';
+import { getCurrentUser } from '@/lib/session';
 
 const createSalaryRuleSchema = z.object({
     name: z.string().min(1),
@@ -20,6 +20,11 @@ const createSalaryRuleSchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        const user = await getCurrentUser(request);
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const result = createSalaryRuleSchema.safeParse(body);
 
@@ -31,10 +36,8 @@ export async function POST(request: NextRequest) {
         }
 
         const data = result.data;
-        const userId = "user-123";
-
         const rule = await salaryRuleService.create({
-            userId,
+            userId: user.id,
             ...data,
             validFrom: new Date(data.validFrom),
         });
@@ -50,9 +53,13 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-    const userId = "user-123";
+    const user = await getCurrentUser(request);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     try {
-        const activeRule = await salaryRuleService.getActive(userId);
+        const activeRule = await salaryRuleService.getActive(user.id);
         return NextResponse.json({ active: activeRule }, { status: 200 });
     } catch (error: any) {
         return NextResponse.json(

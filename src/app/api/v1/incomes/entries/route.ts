@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { incomeService } from '@/modules/income/income.service';
 import { IncomeEntryType } from '@/generated/prisma/client';
+import { getCurrentUser } from '@/lib/session';
 
 const logIncomeEntrySchema = z.object({
     sourceId: z.string().cuid(),
@@ -14,6 +15,11 @@ const logIncomeEntrySchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        const user = await getCurrentUser(request);
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const result = logIncomeEntrySchema.safeParse(body);
 
@@ -25,17 +31,14 @@ export async function POST(request: NextRequest) {
         }
 
         const data = result.data;
-        const userId = "user-123";
-
-        // data.metadata is now strictly typed as Json, which is compatible with Prisma.InputJsonValue
         const entry = await incomeService.logIncomeEntry({
-            userId,
+            userId: user.id,
             sourceId: data.sourceId,
             amount: data.amount.toString(),
             currency: data.currency,
             date: new Date(data.date),
             type: data.type,
-            metadata: data.metadata, // No 'as any' needed
+            metadata: data.metadata,
         });
 
         return NextResponse.json(entry, { status: 201 });
@@ -49,10 +52,14 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+    const user = await getCurrentUser(request);
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const from = searchParams.get('from');
     const to = searchParams.get('to');
-    const userId = "user-123";
 
     if (!from || !to) {
         return NextResponse.json(
@@ -63,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const history = await incomeService.getIncomeHistory(
-            userId,
+            user.id,
             new Date(from),
             new Date(to)
         );
