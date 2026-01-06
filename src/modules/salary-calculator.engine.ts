@@ -1,7 +1,6 @@
-// src/modules/salary-calculator.engine.ts
 import Decimal from 'decimal.js';
 
-// --- Domain Types (Decoupled from Prisma) ---
+// --- Domain Types ---
 
 export type SalaryBaseType = 'MONTHLY' | 'DAILY' | 'HOURLY';
 export type WorkDayStatus = 'WORKED' | 'HOLIDAY' | 'WORKED_HOLIDAY' | 'SICK' | 'UNPAID_LEAVE';
