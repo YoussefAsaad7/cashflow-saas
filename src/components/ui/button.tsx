@@ -50,8 +50,7 @@ export default function Button({
       `bg-primary-600 text-white hover:bg-primary-700 shadow-lg shadow-primary-500/20`,
 
     secondary:
-      `bg-slate-100 text-slate-700 border border-slate-200 hover:bg-white
-       dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700`,
+      `border border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-900 transition-colors`,
 
     link:
       'bg-transparent px-0 py-0 text-primary-600 hover:underline dark:text-primary-400',
