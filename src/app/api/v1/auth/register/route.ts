@@ -21,14 +21,33 @@ export async function POST(req: NextRequest) {
         }
 
         const user = await authService.register(result.data);
-        return NextResponse.json(user, { status: 201 });
-    } catch (error: any) {
-        if (error.message === "User already exists") {
-            return NextResponse.json(
-                { error: "User already exists" },
-                { status: 409 }
-            );
+        const loginResult = await authService.login(result.data);
+        // Create response with user data and token
+        const response = NextResponse.json({
+            user: loginResult.user,
+            token: loginResult.token, // For mobile apps
+        });
+
+        // Set session cookie for web clients
+        response.cookies.set("next-auth.session-token", loginResult.token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 30 * 24 * 60 * 60, // 30 days
+        });
+
+        return response;
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            if (error.message === "User already exists") {
+                return NextResponse.json(
+                    { error: "User already exists" },
+                    { status: 409 }
+                );
+            }
         }
+
         console.error("Register Error:", error);
         return NextResponse.json(
             { error: "Internal Server Error" },
