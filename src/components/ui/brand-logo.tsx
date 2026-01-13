@@ -25,7 +25,7 @@ const sizes = {
     }
 }
 
-export default function BrandLogo({ showText = true, size = "md", className = "" }: BrandLogoProps) {
+export default function BrandLogo({showText = true, size = "md", className = ""}: BrandLogoProps) {
     const s = sizes[size];
 
     return (
@@ -34,8 +34,7 @@ export default function BrandLogo({ showText = true, size = "md", className = ""
                 <TrendingUp className="w-1/2 h-1/2" />
             </div>
             {showText && (
-                <span className={cn("font-bold tracking-tight text-slate-900 dark:text-white",
-                    s.text)}>
+                <span className={cn("font-bold tracking-tight text-slate-900 dark:text-white", s.text)}>
                     CashFlow
                 </span>
             )}
