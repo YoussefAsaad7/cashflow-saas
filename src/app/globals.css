@@ -4,6 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
   /* Brand */
   --color-primary-50: var(--color-indigo-50);
   --color-primary-100: var(--color-indigo-100);
