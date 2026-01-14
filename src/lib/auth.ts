@@ -8,6 +8,7 @@ export const authOptions: NextAuthOptions = {
     // Adapters are only for database sessions
     session: {
         strategy: "jwt",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
     },
     providers: [
         GoogleProvider({
@@ -39,9 +40,22 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
+        async jwt({ token, user, account, profile }) {
+            // Initial sign in
+            if (account && user) {
+                // For Google Provider (or other OAuth providers)
+                if (account.provider === "google") {
+                    const dbUser = await authService.handleOAuthLogin({
+                        email: user.email!,
+                        name: user.name || undefined,
+                        image: user.image || undefined,
+                    });
+                    token.id = dbUser.id;
+                }
+                // For Credentials Provider, 'user' is already the DB user object returned by 'authorize'
+                else {
+                    token.id = user.id;
+                }
             }
             return token;
         },
@@ -53,8 +67,8 @@ export const authOptions: NextAuthOptions = {
         },
     },
     pages: {
-        signIn: "/auth/signin",
-        error: "/auth/error",
+        signIn: "/login",
+        error: "/login", // Redirect errors back to login for now, or let NextAuth handle it default if we remove this line. Let's keep /login to avoid 404s.
     },
-    secret: process.env.NEXTAUTH_SECRET || "super_secret_for_dev_env",
+    secret: process.env.NEXTAUTH_SECRET,
 };
