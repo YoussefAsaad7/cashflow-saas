@@ -28,14 +28,8 @@ export async function POST(req: NextRequest) {
             token: loginResult.token, // For mobile apps
         });
 
-        // Set session cookie for web clients
-        response.cookies.set("next-auth.session-token", loginResult.token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 30 * 24 * 60 * 60, // 30 days
-        });
+        // Set session cookie for web clients - REMOVED: Managed by NextAuth now.
+        // response.cookies.set("next-auth.session-token", loginResult.token, { ... });
 
         return response;
     } catch (error: unknown) {

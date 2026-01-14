@@ -38,9 +38,14 @@ export async function middleware(req: NextRequest) {
         if (authHeader && authHeader.startsWith("Bearer ")) {
             const token = authHeader.split(" ")[1];
             try {
+                // Ensure secret is present (NextAuth requires it)
+                if (!process.env.NEXTAUTH_SECRET) {
+                    throw new Error("NEXTAUTH_SECRET not set");
+                }
+
                 const decoded = await decode({
                     token,
-                    secret: process.env.NEXTAUTH_SECRET || "super_secret_for_dev_env",
+                    secret: process.env.NEXTAUTH_SECRET,
                 });
 
                 if (decoded) {

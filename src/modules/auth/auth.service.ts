@@ -98,4 +98,8 @@ export const authService = {
             image: user.image,
         };
     },
+
+    async handleOAuthLogin(data: { email: string; name?: string; image?: string }) {
+        return authRepository.upsertByEmail(data);
+    },
 };
