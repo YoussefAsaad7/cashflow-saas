@@ -1,23 +1,13 @@
 import { signIn, signOut } from "next-auth/react";
 import { loginInput, registerInput } from "./auth.schemas";
 
+import { User, AuthResponse } from "./auth.types";
+
 const BASE_URL = "/api/v1"; // Relative path is better for Next.js
 
 type ApiError = {
     error: string;
 };
-
-export interface User {
-    id: string;
-    email: string;
-    name?: string | null;
-    image?: string | null;
-}
-
-export interface AuthResponse {
-    user: User;
-    token?: string; // Made optional as NextAuth handles the session token
-}
 
 async function handleResponse<T>(res: Response): Promise<T> {
     const data = await res.json();
