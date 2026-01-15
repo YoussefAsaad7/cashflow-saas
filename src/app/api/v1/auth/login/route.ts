@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { encode } from "next-auth/jwt";
 import { loginSchema } from "@/domain/auth/auth.schemas";
 import { authService } from "@/modules/auth/auth.service";
 
@@ -15,12 +16,23 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const loginResult = await authService.login(result.data);
+        const user = await authService.login(result.data);
+
+        // Generate JWT token for mobile/external access
+        const secret = process.env.NEXTAUTH_SECRET || "super_secret_for_dev_env";
+        const token = await encode({
+            token: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+            },
+            secret,
+        });
 
         // Create response with user data and token
         const response = NextResponse.json({
-            user: loginResult.user,
-            token: loginResult.token, // For mobile apps
+            user,
+            token, // For mobile apps
         });
 
         // Set session cookie for web clients - REMOVED: Managed by NextAuth now.

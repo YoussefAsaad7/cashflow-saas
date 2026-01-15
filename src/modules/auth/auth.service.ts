@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import { encode } from "next-auth/jwt";
 import { authRepository } from "./auth.repository";
 
 export interface RegisterInput {
@@ -11,15 +10,6 @@ export interface RegisterInput {
 export interface LoginInput {
     email: string;
     password: string;
-}
-
-export interface LoginResult {
-    user: {
-        id: string;
-        name: string | null;
-        email: string;
-    };
-    token: string;
 }
 
 export const authService = {
@@ -43,7 +33,7 @@ export const authService = {
         });
     },
 
-    async login(input: LoginInput): Promise<LoginResult> {
+    async login(input: LoginInput) {
         const { email, password } = input;
 
         // Find user
@@ -58,25 +48,14 @@ export const authService = {
             throw new Error("Invalid credentials");
         }
 
-        // Generate JWT token
-        const secret = process.env.NEXTAUTH_SECRET || "super_secret_for_dev_env";
-        const token = await encode({
-            token: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                picture: user.image,
-            },
-            secret,
-        });
-
         return {
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-            },
-            token,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            // Returning picture if available to match previous logic logic potential
+            // But previous simplified return explicitly.
+            // Previous return was: { id, name, email }.
+            // Let's stick to that for now, or better: return the Prisma user object (subset)
         };
     },
 
