@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { registerSchema } from "@/domain/auth/auth.schemas";
 import { authService } from "@/modules/auth/auth.service";
 
-const registerSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    name: z.string().optional(),
-});
 
 export async function POST(req: NextRequest) {
     try {
