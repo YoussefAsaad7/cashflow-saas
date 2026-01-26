@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock, User, Loader2, ArrowRight } from "lucide-react";
 
-import Button from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import InputField from "@/components/ui/input-field";
 import { Checkbox } from "@/components/ui/checkbox";
 import Divider from "@/components/ui/divider";

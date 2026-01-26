@@ -1,4 +1,4 @@
-import { TrendingUp } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 type BrandLogoProps = {
@@ -10,18 +10,21 @@ type BrandLogoProps = {
 const sizes = {
     sm: {
         wrapper: "gap-2",
-        icon: "w-7 h-7 rounded-lg",
-        text: "text-lg"
+        iconWrapper: "size-8",
+        iconSize: "size-4",
+        text: "text-sm"
     },
     md: {
         wrapper: "gap-3",
-        icon: "w-10 h-10 rounded-xl",
-        text: "text-2xl"
+        iconWrapper: "size-12",
+        iconSize: "size-6",
+        text: "text-lg"
     },
     lg: {
         wrapper: "gap-3",
-        icon: "w-12 h-12 rounded-2xl",
-        text: "text-3xl"
+        iconWrapper: "size-16",
+        iconSize: "size-8",
+        text: "text-xl"
     }
 }
 
@@ -30,13 +33,14 @@ export default function BrandLogo({showText = true, size = "md", className = ""}
 
     return (
         <div className={cn("flex items-center", s.wrapper, className)}>
-            <div className={cn("flex items-center justify-center bg-primary-600 text-white shadow-lg shadow-primary-500/30", s.icon)}>
-                <TrendingUp className="w-1/2 h-1/2" />
+            <div className={cn("flex items-center justify-center aspect-square rounded-lg text-primary-foreground bg-primary", s.iconWrapper)}>
+                <DollarSign className={s.iconSize} />
             </div>
             {showText && (
-                <span className={cn("font-bold tracking-tight text-slate-900 dark:text-white", s.text)}>
-                    CashFlow
-                </span>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">CashFlow</span>
+                  <span className="truncate text-xs text-muted-foreground">Analytics</span>
+                </div>
             )}
         </div>
     );
