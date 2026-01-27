@@ -85,7 +85,7 @@ export default function AuthForm({
                     <Button
                         type="button"
                         variant="link"
-                        size="md"
+                        size="sm"
                         className="ml-2"
                     >
                         Forgot password?
@@ -97,11 +97,10 @@ export default function AuthForm({
             )}
             <Button
                 type="submit"
-                variant="primary"
+                variant="default"
                 size="lg"
                 className="w-full"
                 disabled={form.formState.isSubmitting}
-                rightIcon={<ArrowRight className="h-5 w-5" />}
             >
                 {form.formState.isSubmitting ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
