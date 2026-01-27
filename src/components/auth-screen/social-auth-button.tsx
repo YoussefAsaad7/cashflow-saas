@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/cn";
-import Button from "./button";
+import { Button } from "../ui/button";
 import { signIn } from "next-auth/react";
 
 type SocialProvider = "github" | "google";
@@ -52,13 +52,13 @@ export default function SocialAuthButton({ provider, onClick, disabled, classNam
 
     return (
         <Button
-            variant="secondary"
+            variant="outline"
             onClick={handleLogin}
             disabled={disabled}
             className={cn("w-full gap-2", className)}
-            leftIcon={<Icon />}
             type="button" // explicit type to prevent form submission
         >
+            <Icon className="h-5 w-5" />
             {label}
         </Button>
     );

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import InputField from "@/components/ui/input-field";
 import { Checkbox } from "@/components/ui/checkbox";
 import Divider from "@/components/ui/divider";
-import SocialAuthButton from "@/components/ui/social-auth-button";
+import SocialAuthButton from "@/components/auth-screen/social-auth-button";
 
 import {
     loginSchema,
