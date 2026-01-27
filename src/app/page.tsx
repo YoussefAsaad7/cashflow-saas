@@ -1,5 +1,5 @@
 
-import Button from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import CalendarCell from "@/components/workday-calendar/CalendarCell";
 import CountPill from "@/components/ui/CountPill";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -17,7 +17,7 @@ export default function Home() {
       <p className="text-primary-500"> lbala labla blka</p>
 
       <div className="flex gap-2 mb-2">
-        <Button variant="primary"><span>+</span> Add Expense</Button>
+        <Button variant="default"><span>+</span> Add Expense</Button>
 
         <Button variant="secondary">Secondary</Button>
 
@@ -30,7 +30,7 @@ export default function Home() {
         <CountPill status="UNPAID" count={5} />
         <CountPill status="SICK" count={5} />
         <CountPill status="VACATION" count={5} />
-      </div> 
+      </div>
 
       <div className="flex gap-2">
         <StatusBadge status="WORKED" />
@@ -43,7 +43,7 @@ export default function Home() {
 
 
       <div>
-        
+
       </div>
     </div>
   );

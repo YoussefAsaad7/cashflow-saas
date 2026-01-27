@@ -1,24 +1,65 @@
 import { analyticsRepository } from "./analytics.repository";
 import { expenseRepository } from "@/modules/expenses/expense.repository";
-import { incomeRepository } from "@/modules/income/income.repository"; // We might need to export listSources if not already
+import { incomeRepository } from "@/modules/income/income.repository";
+import { differenceInDays, subDays } from "date-fns";
 
 export const analyticsService = {
     async getFinancialSummary(userId: string, from: Date, to: Date) {
-        const totalIncome = await analyticsRepository.aggregateIncome(userId, from, to);
-        const totalExpenses = await analyticsRepository.aggregateExpenses(userId, from, to);
+        const diffDays = differenceInDays(to, from) + 1; // +1 to include start day impact if needed, or just standard difference. Usually differenceInDays(to, from) is fine for "period length".
+        // If from=Jan 1 and to=Jan 31, diff is 30? No, usually we want inclusive range.
+        // Let's stick seamlessly to logic: Period B ends at 'from'. Period B starts 'diff' days before.
 
-        // Convert to numbers for calculation (Prisma returns Decimal or number depending on config, usually Decimal for money)
-        // Assuming handling as Number/Float for simplicity in this layer, or Decimal if strictly typed.
-        // The aggregate returns Decimal usually.
+        const previousTo = new Date(from);
+        const previousFrom = subDays(from, diffDays);
+
+        const [
+            totalIncome,
+            totalExpenses,
+            lastPeriodIncome,
+            lastPeriodExpenses
+        ] = await Promise.all([
+            analyticsRepository.aggregateIncome(userId, from, to),
+            analyticsRepository.aggregateExpenses(userId, from, to),
+            analyticsRepository.aggregateIncome(userId, previousFrom, previousTo),
+            analyticsRepository.aggregateExpenses(userId, previousFrom, previousTo)
+        ]);
+
         const incomeVal = Number(totalIncome);
         const expenseVal = Number(totalExpenses);
+        const lastPeriodIncomeVal = Number(lastPeriodIncome);
+        const lastPeriodExpenseVal = Number(lastPeriodExpenses);
+
+        const netCashFlow = incomeVal - expenseVal;
+        const lastPeriodNetCashFlow = lastPeriodIncomeVal - lastPeriodExpenseVal;
+
+        const savingsRate = incomeVal > 0 ? ((incomeVal - expenseVal) / incomeVal) * 100 : 0;
+        const lastPeriodSavingsRate = lastPeriodIncomeVal > 0 ? ((lastPeriodIncomeVal - lastPeriodExpenseVal) / lastPeriodIncomeVal) * 100 : 0;
 
         return {
-            totalIncome: incomeVal,
-            totalExpenses: expenseVal,
-            netCashFlow: incomeVal - expenseVal,
-            savingsRate: incomeVal > 0 ? ((incomeVal - expenseVal) / incomeVal) * 100 : 0,
+            totalIncome: {
+                value: incomeVal,
+                trend: this.calculateTrend(incomeVal, lastPeriodIncomeVal)
+            },
+            totalExpenses: {
+                value: expenseVal,
+                trend: this.calculateTrend(expenseVal, lastPeriodExpenseVal)
+            },
+            netCashFlow: {
+                value: netCashFlow,
+                trend: this.calculateTrend(netCashFlow, lastPeriodNetCashFlow)
+            },
+            savingsRate: {
+                value: savingsRate,
+                trend: savingsRate - lastPeriodSavingsRate // Percentage point difference for rates, or standard trend? usually trend for rates is just diff.
+            }
         };
+    },
+
+    calculateTrend(current: number, previous: number): number {
+        if (previous === 0) {
+            return current === 0 ? 0 : 100;
+        }
+        return ((current - previous) / Math.abs(previous)) * 100;
     },
 
     async getExpenseCategoryBreakdown(userId: string, from: Date, to: Date) {
@@ -99,5 +140,5 @@ export const analyticsService = {
         return Array.from(trendMap.values())
             .map(item => ({ ...item, net: item.income - item.expenses }))
             .sort((a, b) => a.date.localeCompare(b.date));
-    }
+    },
 };
