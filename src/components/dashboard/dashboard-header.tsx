@@ -7,7 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 
 export function DashboardHeader() {
     return (
-        <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+        <header className="border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-40">
             <div className="flex h-14 items-center gap-4 px-4">
                 <SidebarTrigger className="-ml-1" />
                 <div className="flex-1 flex items-center gap-4">
