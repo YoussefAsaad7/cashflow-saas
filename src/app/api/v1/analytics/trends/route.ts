@@ -3,7 +3,7 @@ import { analyticsService } from '@/modules/analytics/analytics.service';
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/session';
 
-const intervalSchema = z.enum(['day', 'month']).default('day');
+const intervalSchema = z.enum(['day', 'month', 'week', 'year']).default('day');
 
 export async function GET(request: NextRequest) {
     const user = await getCurrentUser(request);
@@ -34,9 +34,9 @@ export async function GET(request: NextRequest) {
             interval
         );
         return NextResponse.json(trends, { status: 200 });
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json(
-            { error: error.message || 'Internal Server Error' },
+            { error: error instanceof Error ? error.message : 'Internal Server Error' },
             { status: 500 }
         );
     }
