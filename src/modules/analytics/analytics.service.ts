@@ -2,7 +2,17 @@ import { analyticsRepository } from "./analytics.repository";
 import { expenseRepository } from "@/modules/expenses/expense.repository";
 import { incomeRepository } from "@/modules/income/income.repository";
 import { differenceInDays, subDays } from "date-fns";
-
+import {
+    eachDayOfInterval,
+    eachWeekOfInterval,
+    eachMonthOfInterval,
+    eachYearOfInterval,
+    format,
+    startOfDay,
+    startOfWeek,
+    startOfMonth,
+    startOfYear,
+} from "date-fns";
 export const analyticsService = {
     async getFinancialSummary(userId: string, from: Date, to: Date) {
         const diffDays = differenceInDays(to, from) + 1; // +1 to include start day impact if needed, or just standard difference. Usually differenceInDays(to, from) is fine for "period length".
@@ -104,41 +114,92 @@ export const analyticsService = {
         }).sort((a, b) => b.value - a.value);
     },
 
-    async getTrends(userId: string, from: Date, to: Date, interval: 'day' | 'month' = 'day') {
-        const incomeData = await analyticsRepository.getIncomeTrendData(userId, from, to);
-        const expenseData = await analyticsRepository.getExpenseTrendData(userId, from, to);
+    async getTrends(userId: string, from: Date, to: Date, interval: 'day' | 'month' | 'week' | 'year') {
+        const [incomeData, expenseData] = await Promise.all([
+            analyticsRepository.getIncomeTrendData(userId, from, to),
+            analyticsRepository.getExpenseTrendData(userId, from, to),
+        ])
+        // create empty timeline (gap filling backbone)
+        const timeline = this.getIntervalDates(from, to, interval);
 
-        // Helper to format date key based on interval
-        const getDateKey = (date: Date) => {
-            const d = new Date(date);
-            if (interval === 'month') {
-                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const trendMap = new Map<string, {
+            date: string,
+            income: number,
+            expenses: number,
+        }>();
+
+        timeline.forEach((date) => {
+            const key = this.formatKey(date, interval);
+            trendMap.set(key, {
+                date: key,
+                income: 0,
+                expenses: 0,
+            });
+        });
+
+        // Aggregate income
+        for (const entry of incomeData) {
+            const bucketDate = this.normalizeDate(entry.date, interval);
+            const key = this.formatKey(bucketDate, interval);
+            const bucket = trendMap.get(key);
+            if (bucket) {
+                bucket.income += Number(entry.amount);
             }
-            return d.toISOString().split('T')[0]; // YYYY-MM-DD
-        };
+        }
+        // Aggregate expenses
+        for (const entry of expenseData) {
+            const bucketDate = this.normalizeDate(entry.date, interval);
+            const key = this.formatKey(bucketDate, interval);
+            const bucket = trendMap.get(key);
+            if (bucket) {
+                bucket.expenses += Number(entry.amount);
+            }
+        }
 
-        const trendMap = new Map<string, { date: string, income: number, expenses: number }>();
-
-        // Initialize map ? (Optional: fill gaps if needed, skipping for now to show actual data)
-
-        // Process Income
-        incomeData.forEach(entry => {
-            const key = getDateKey(entry.date);
-            const current = trendMap.get(key) || { date: key, income: 0, expenses: 0 };
-            current.income += Number(entry.amount);
-            trendMap.set(key, current);
+        // compute derived values
+        return Array.from(trendMap.values()).map((item) => {
+            return {
+                ...item,
+                net: item.income - item.expenses,
+            }
         });
+    },
 
-        // Process Expense
-        expenseData.forEach(entry => {
-            const key = getDateKey(entry.date);
-            const current = trendMap.get(key) || { date: key, income: 0, expenses: 0 };
-            current.expenses += Number(entry.amount);
-            trendMap.set(key, current);
-        });
 
-        return Array.from(trendMap.values())
-            .map(item => ({ ...item, net: item.income - item.expenses }))
-            .sort((a, b) => a.date.localeCompare(b.date));
+    //helpers
+    getIntervalDates(from: Date, to: Date, interval: 'day' | 'week' | 'month' | 'year') {
+        switch (interval) {
+            case 'day':
+                return eachDayOfInterval({ start: from, end: to })
+            case 'week':
+                return eachWeekOfInterval({ start: from, end: to })
+            case 'month':
+                return eachMonthOfInterval({ start: from, end: to })
+            case 'year':
+                return eachYearOfInterval({ start: from, end: to })
+        }
+    },
+    normalizeDate(date: Date, interval: 'day' | 'week' | 'month' | 'year') {
+        switch (interval) {
+            case 'day':
+                return startOfDay(date);
+            case 'week':
+                return startOfWeek(date);
+            case 'month':
+                return startOfMonth(date);
+            case 'year':
+                return startOfYear(date);
+        }
+    },
+    formatKey(date: Date, interval: 'day' | 'week' | 'month' | 'year') {
+        switch (interval) {
+            case 'day':
+            case 'week':
+                return format(date, 'yyyy-MM-dd');
+            case 'month':
+                return format(date, 'yyyy-MM');
+            case 'year':
+                return format(date, 'yyyy');
+        }
     },
 };
