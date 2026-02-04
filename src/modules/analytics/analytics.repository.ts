@@ -60,9 +60,11 @@ export const analyticsRepository = {
         });
     },
 
-    // --- Trends (Raw Data for Service Aggregation) ---
-    // We fetch raw data here because Prisma's groupBy(date) is limited without raw SQL.
-    // For a "Start" scale, fetching relevant fields is performant enough.
+    // --- Trends (Raw Data for Service-Level Aggregation) ---
+    // Prisma does not support time-bucket aggregation (day/week/month) without raw SQL.
+    // We fetch minimal raw records (date + amount) and aggregate them in the service layer.
+    // This keeps the implementation DB-agnostic and flexible, and is performant
+    // enough for early-stage and mid-scale usage.
     async getIncomeTrendData(userId: string, from: Date, to: Date) {
         return prisma.incomeEntry.findMany({
             select: { date: true, amount: true },
