@@ -1,12 +1,14 @@
 "use client";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DateRangePicker } from "@/components/dashboard/date-range-picker";
+import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { useDashboardStats } from "@/hooks/use-dashboard-stats";
 import { subMonths } from "date-fns";
-import { DollarSign, Percent, PiggyBank, TrendingDown, TrendingUp } from "lucide-react";
+import { Percent, PiggyBank, TrendingDown, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { DateRange } from "react-day-picker";
+
 
 export default function Dashboard() {
 
@@ -72,7 +74,7 @@ export default function Dashboard() {
                 </div>
                 {/* income vs expenses and comulative saving charts*/}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-
+                    <IncomeExpenseChart dateRange={dateRange} />
                 </div>
             </div>
         </main>
