@@ -4,16 +4,24 @@ import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, type TooltipProps, XAxis, YAxis } from "recharts";
 import { useDashboardTrends } from "@/hooks/use-dashboard-trends";
 import { DateRange } from "react-day-picker";
-import { Interval } from "@/types/analytics";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
+type ChartInterval = 'day' | 'week' | 'month' | 'year';
+type TooltipEntry = {
+    name: string
+    value: number
+    color: string
+}
+
 type CustomTooltipProps = TooltipProps<ValueType, NameType> & {
-    interval: Interval;
+    interval: ChartInterval;
+    payload: TooltipEntry[];
+    label: string;
 };
 
 const incomeColor = "var(--chart-5)";
 const expensesColor = "var(--chart-2)";
-const formatInterval = (value: string, interval: Interval) => {
+const formatInterval = (value: string, interval: ChartInterval) => {
     if (!value) return "";
     switch (interval) {
         case "day":
@@ -27,35 +35,33 @@ const formatInterval = (value: string, interval: Interval) => {
     }
 
 }
-// @ts-expect-error FIXME: Type 'any' is not assignable to type 'ValueType'.
+
 const CustomTooltip = ({ active, payload, label, interval }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-        return (
-            <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-                <p className="text-sm font-medium text-foreground mb-2">{formatInterval(label, interval)}</p>
-                {payload.map((entry: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between gap-4 text-sm">
-                        <span className="flex items-center gap-2 text-foreground">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                            {entry.name}
-                        </span>
-                        <span className="font-mono font-medium text-foreground">${entry.value.toLocaleString()}</span>
-                    </div>
-                ))}
-                {payload.length === 2 && (
-                    <div className="flex items-center justify-between gap-4 text-sm mt-2 pt-2 border-t border-border">
-                        <span className="text-muted-foreground">Net</span>
-                        <span
-                            className={`font-mono font-medium ${payload[0].value - payload[1].value >= 0 ? "text-success" : "text-destructive"}`}
-                        >
-                            ${(payload[0].value - payload[1].value).toLocaleString()}
-                        </span>
-                    </div>
-                )}
-            </div>
-        );
-    }
-    return null;
+    if (!active || !payload?.length) return null;
+    return (
+        <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
+            <p className="text-sm font-medium text-foreground mb-2">{formatInterval(label, interval)}</p>
+            {payload.map((entry: TooltipEntry, index: number) => (
+                <div key={index} className="flex items-center justify-between gap-4 text-sm">
+                    <span className="flex items-center gap-2 text-foreground">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                        {entry.name}
+                    </span>
+                    <span className="font-mono font-medium text-foreground">${entry.value.toLocaleString()}</span>
+                </div>
+            ))}
+            {payload.length === 2 && (
+                <div className="flex items-center justify-between gap-4 text-sm mt-2 pt-2 border-t border-border">
+                    <span className="text-muted-foreground">Net</span>
+                    <span
+                        className={`font-mono font-medium ${payload[0].value - payload[1].value >= 0 ? "text-success" : "text-destructive"}`}
+                    >
+                        ${(payload[0].value - payload[1].value).toLocaleString()}
+                    </span>
+                </div>
+            )}
+        </div>
+    );
 };
 
 export function IncomeExpenseChart({ dateRange }: { dateRange: DateRange | undefined }) {
@@ -113,6 +119,7 @@ export function IncomeExpenseChart({ dateRange }: { dateRange: DateRange | undef
                                     axisLine={false}
                                     tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                                 />
+                                {/* @ts-expect-error custom tooltip*/}
                                 <Tooltip content={<CustomTooltip interval={interval} />} cursor={{ fill: "oklch(0.22 0.01 260)", opacity: 0.5 }} />
                                 <Bar dataKey="income" name="Income" fill={incomeColor} radius={[4, 4, 0, 0]} />
                                 <Bar dataKey="expenses" name="Expenses" fill={expensesColor} radius={[4, 4, 0, 0]} />
