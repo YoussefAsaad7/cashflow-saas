@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { analyticsService } from '@/modules/analytics/analytics.service';
 import { getCurrentUser } from '@/lib/session';
+import { summaryQuerySchema } from '@/shared/schemas/analytics';
+import { SummaryResponse } from '@/shared/contracts/analytics';
 
 export async function GET(request: NextRequest) {
     const user = await getCurrentUser(request);
@@ -8,16 +10,17 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const from = searchParams.get('from');
-    const to = searchParams.get('to');
-
-    if (!from || !to) {
+    const rawQuery = Object.fromEntries(
+        new URL(request.url).searchParams.entries()
+    );
+    const parsed = summaryQuerySchema.safeParse(rawQuery);
+    if (!parsed.success){
         return NextResponse.json(
-            { error: "Missing 'from' or 'to' query parameters" },
-            { status: 400 }
+            {error: parsed.error.flatten()},
+            {status: 400}
         );
     }
+    const {from, to} = parsed.data;
 
     try {
         const summary = await analyticsService.getFinancialSummary(
@@ -25,10 +28,10 @@ export async function GET(request: NextRequest) {
             new Date(from),
             new Date(to)
         );
-        return NextResponse.json(summary, { status: 200 });
-    } catch (error: any) {
+        return NextResponse.json<SummaryResponse>(summary, { status: 200 });
+    } catch (error) {
         return NextResponse.json(
-            { error: error.message || 'Internal Server Error' },
+            { error: error instanceof Error ? error.message : 'Internal Server Error' },
             { status: 500 }
         );
     }
