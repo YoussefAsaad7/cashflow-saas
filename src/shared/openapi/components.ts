@@ -10,6 +10,14 @@ export const components = {
             },
             required: ["date", "income", "expenses", "net"],
         },
+        KPI: {
+            type: "object",
+            properties: {
+                value: {type: "number", example: 1200},
+                trend: {type: "number", example: 200},
+            },
+            required: ["value", "trend"],
+        },
         ApiError: {
             type: "object",
             properties: {

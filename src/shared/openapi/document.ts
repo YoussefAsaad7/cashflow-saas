@@ -1,4 +1,5 @@
 import {components} from "./components";
+import { analyticsSummaryPath } from "./paths/analytics.summary";
 import { analyticsTrendsPath } from "./paths/analytics.trends";
 
 export const openApiDocument = {
@@ -13,6 +14,7 @@ export const openApiDocument = {
     ],
     paths: {
         ...analyticsTrendsPath,
+        ...analyticsSummaryPath,
     },
     components,
 };
