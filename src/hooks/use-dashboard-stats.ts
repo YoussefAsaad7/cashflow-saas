@@ -1,13 +1,8 @@
 "use client";
+import { FinancialSummary } from "@/shared/contracts/analytics";
 import { useQuery } from "@tanstack/react-query";
 import { type DateRange } from "react-day-picker";
 
-type FinancialSummary = {
-    totalIncome: { value: number, trend: number };
-    totalExpenses: { value: number, trend: number };
-    netCashFlow: { value: number, trend: number };
-    savingsRate: { value: number, trend: number };
-}
 
 export function useDashboardStats(dateRange?: DateRange) {
     const fromISO = dateRange?.from?.toISOString();
