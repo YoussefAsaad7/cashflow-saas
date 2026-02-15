@@ -1,8 +1,8 @@
 "use client";
 import { format, parseISO } from "date-fns";
-import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, type TooltipProps, XAxis, YAxis } from "recharts";
-import { useDashboardTrends } from "@/hooks/use-dashboard-trends";
+import { useDashboardTrends } from "@/features/analytics/hooks/use-dashboard-trends";
 import { DateRange } from "react-day-picker";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 

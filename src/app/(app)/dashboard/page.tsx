@@ -1,9 +1,9 @@
 "use client";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DateRangePicker } from "@/components/dashboard/date-range-picker";
-import { IncomeExpenseChart } from "@/components/dashboard/income-expense-chart";
+import { IncomeExpenseChart } from "@/features/analytics/components/income-expense-chart";
 import { KpiCard } from "@/components/dashboard/kpi-card";
-import { useDashboardStats } from "@/hooks/use-dashboard-stats";
+import { useDashboardStats } from "@/features/analytics/hooks/use-dashboard-stats";
 import { subMonths } from "date-fns";
 import { Percent, PiggyBank, TrendingDown, TrendingUp } from "lucide-react";
 import { useState } from "react";
