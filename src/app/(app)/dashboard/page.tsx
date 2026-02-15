@@ -3,7 +3,7 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DateRangePicker } from "@/components/dashboard/date-range-picker";
 import { IncomeExpenseChart } from "@/features/analytics/components/income-expense-chart";
 import { KpiCard } from "@/components/dashboard/kpi-card";
-import { useDashboardStats } from "@/features/analytics/hooks/use-dashboard-stats";
+import { useSummary } from "@/features/analytics/hooks/use-summary";
 import { subMonths } from "date-fns";
 import { Percent, PiggyBank, TrendingDown, TrendingUp } from "lucide-react";
 import { useState } from "react";
@@ -16,7 +16,7 @@ export default function Dashboard() {
         from: subMonths(new Date(), 6),
         to: new Date()
     });
-    const { stats, isPending, isError } = useDashboardStats(dateRange);
+    const { stats, isPending, isError } = useSummary(dateRange);
 
     return <>
         <DashboardHeader />

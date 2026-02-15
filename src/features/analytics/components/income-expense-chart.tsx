@@ -2,7 +2,7 @@
 import { format, parseISO } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, type TooltipProps, XAxis, YAxis } from "recharts";
-import { useDashboardTrends } from "@/features/analytics/hooks/use-dashboard-trends";
+import { useTrends } from "@/features/analytics/hooks/use-trends";
 import { DateRange } from "react-day-picker";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
@@ -65,7 +65,7 @@ const CustomTooltip = ({ active, payload, label, interval }: CustomTooltipProps)
 };
 
 export function IncomeExpenseChart({ dateRange }: { dateRange: DateRange | undefined }) {
-    const { trends, isPending, isError, interval } = useDashboardTrends(dateRange);
+    const { trends, isPending, isError, interval } = useTrends(dateRange);
 
     return (
         <Card className="bg-card">

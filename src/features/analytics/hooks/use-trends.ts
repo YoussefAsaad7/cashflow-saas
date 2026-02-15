@@ -27,7 +27,7 @@ const determineInterval = (range: NormalizedRange): Interval => {
     return "year";
 };
 
-export function useDashboardTrends(dateRange?: DateRange) {
+export function useTrends(dateRange?: DateRange) {
     const range = normalizeRange(dateRange);
     const interval = range ? determineInterval(range) : 'day';
 
