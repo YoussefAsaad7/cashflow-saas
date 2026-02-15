@@ -7,7 +7,7 @@ import { type DateRange } from "react-day-picker";
 export function useSummary(dateRange?: DateRange) {
     const fromISO = dateRange?.from?.toISOString();
     const toISO = dateRange?.to?.toISOString();
-    const { data: stats, isPending, isError } = useQuery<FinancialSummary>({
+    const { data, isPending, isError } = useQuery<FinancialSummary>({
         queryKey: ['dashboard-stats', fromISO, toISO],
         enabled: Boolean(dateRange?.from && dateRange?.to),
         queryFn: async () => {
@@ -18,5 +18,5 @@ export function useSummary(dateRange?: DateRange) {
             return res.json();
         },
     });
-    return { stats, isPending, isError };
+    return { data, isPending, isError };
 }

@@ -2,11 +2,17 @@
 import { format, parseISO } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, type TooltipProps, XAxis, YAxis } from "recharts";
-import { useTrends } from "@/features/analytics/hooks/use-trends";
-import { DateRange } from "react-day-picker";
 import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import { TrendsResponse } from "@/shared/contracts/analytics";
 
 type ChartInterval = 'day' | 'week' | 'month' | 'year';
+type ChartProps = {
+    data?: TrendsResponse
+    isLoading: boolean
+    isError: boolean
+    interval: ChartInterval
+};
+
 type TooltipEntry = {
     name: string
     value: number
@@ -64,8 +70,7 @@ const CustomTooltip = ({ active, payload, label, interval }: CustomTooltipProps)
     );
 };
 
-export function IncomeExpenseChart({ dateRange }: { dateRange: DateRange | undefined }) {
-    const { trends, isPending, isError, interval } = useTrends(dateRange);
+export function IncomeExpenseChart({ data, isLoading, isError, interval }: ChartProps) {
 
     return (
         <Card className="bg-card">
@@ -87,13 +92,13 @@ export function IncomeExpenseChart({ dateRange }: { dateRange: DateRange | undef
             <CardContent>
                 <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%" className="relative">
-                        {trends?.length == 0 || isPending || isError ? (
+                        {data?.length == 0 || isLoading || isError ? (
                             <div className="absolute inset-0 bg-card/50 backdrop-blur-[2px] flex items-center justify-center z-10">
                                 {isError ? (
                                     <span className="text-xs text-destructive font-medium bg-background/80 px-2 py-1 rounded shadow-sm border border-destructive/20">
                                         Error loading data
                                     </span>
-                                ) : isPending ? (
+                                ) : isLoading ? (
                                     <span className="text-xs text-muted-foreground font-medium bg-background/80 px-2 py-1 rounded shadow-sm border border-muted-foreground/20">
                                         Loading data...
                                     </span>
@@ -104,7 +109,7 @@ export function IncomeExpenseChart({ dateRange }: { dateRange: DateRange | undef
                                 )}
                             </div>
                         ) : (
-                            <BarChart data={trends} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                            <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.28 0.01 260)" vertical={false} />
                                 <XAxis
                                     dataKey="date"

@@ -31,7 +31,7 @@ export function useTrends(dateRange?: DateRange) {
     const range = normalizeRange(dateRange);
     const interval = range ? determineInterval(range) : 'day';
 
-    const { data: trends, isPending, isError } = useQuery<TrendsResponse>({
+    const { data, isPending, isError } = useQuery<TrendsResponse>({
         queryKey: [
             "dashboard-trends",
             range?.from.toISOString(),
@@ -47,5 +47,5 @@ export function useTrends(dateRange?: DateRange) {
             return res.json();
         },
     });
-    return { trends, isPending, isError, interval };
+    return { data, isPending, isError, interval };
 }
