@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { encode } from "next-auth/jwt";
-import { registerSchema } from "@/domain/auth/auth.schemas";
+import { registerSchema } from "@/features/auth/schema/auth.schemas";
 import { authService } from "@/modules/auth/auth.service";
 
 

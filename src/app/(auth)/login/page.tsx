@@ -1,4 +1,4 @@
-import AuthScreen from "@/components/auth-screen/auth-screen";
+import AuthScreen from "@/features/auth/auth-page";
 
 export default function AuthPage() {
     return <AuthScreen />;

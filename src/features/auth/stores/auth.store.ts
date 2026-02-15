@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
-import type { User, AuthResponse } from "@/domain/auth/auth.types";
-import { login, register, getMe, logout } from "@/domain/auth/auth.api";
-import type { loginInput, registerInput } from "@/domain/auth/auth.schemas";
+import type { User, AuthResponse } from "@/features/auth/types/auth.types";
+import { login, register, getMe, logout } from "@/features/auth/api/auth.api";
+import type { loginInput, registerInput } from "@/features/auth/schema/auth.schemas";
 
 type AuthState = {
     user: User | null;

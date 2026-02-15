@@ -30,7 +30,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import BrandLogo from "./ui/brand-logo";
 import { NavUser } from "./nav-user";
-import { useAuthStore } from "@/stores/auth.store";
+import { useAuthStore } from "@/features/auth/stores/auth.store";
 
 const mainNavItems = [
     {

@@ -15,7 +15,7 @@ import {
     registerSchema,
     loginInput,
     registerInput,
-} from "@/domain/auth/auth.schemas";
+} from "@/features/auth/schema/auth.schemas";
 
 type AuthFormProps = {
     isLogin: boolean;

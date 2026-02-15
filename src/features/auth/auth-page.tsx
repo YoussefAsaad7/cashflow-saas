@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/stores/auth.store";
-import type { loginInput, registerInput } from "@/domain/auth/auth.schemas";
+import { useAuthStore } from "@/features/auth/stores/auth.store";
+import type { loginInput, registerInput } from "@/features/auth/schema/auth.schemas";
 
-import AuthHero from "./auth-hero";
-import AuthHeader from "./auth-header";
-import AuthForm from "./auth-form";
-import AuthFooter from "./auth-footer";
+import AuthHero from "./components/auth-hero";
+import AuthHeader from "./components/auth-header";
+import AuthForm from "./components/auth-form";
+import AuthFooter from "./components/auth-footer";
 
 
 export default function AuthScreen() {
